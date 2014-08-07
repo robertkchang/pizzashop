@@ -25,4 +25,11 @@ public class PizzaDAO {
     List pizzas = session.createQuery("from Pizza").list();
     return pizzas;
   }
+  
+  @Transactional
+  public Pizza findByID(long id) {
+    Session session = sessionFactory.getCurrentSession();
+    Pizza pizza = (Pizza) session.get(Pizza.class, id);
+    return pizza;
+  }
 }
