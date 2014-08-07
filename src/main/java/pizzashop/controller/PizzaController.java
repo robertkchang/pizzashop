@@ -1,6 +1,7 @@
 package pizzashop.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import pizzashop.Pizza;
 import pizzashop.dao.PizzaDAO;
+import pizzashop.utils.PreConditions;
 
 @Controller
 @RequestMapping("/pizzas")
 public class PizzaController {
    
   @Autowired private PizzaDAO pizzaDAO;
-   
+ 
   @RequestMapping(method=RequestMethod.GET)
   public String list(Model model) {
     List<Pizza> pizzas = pizzaDAO.findAll();
@@ -32,7 +34,7 @@ public class PizzaController {
   @RequestMapping(value = "/{id}", method=RequestMethod.GET)
   public String byID(@PathVariable( "id" ) Long id, Model model) {
     List<Pizza> pizzas = new ArrayList<Pizza>();
-    pizzas.add(pizzaDAO.findByID(id));
+    pizzas.add(PreConditions.checkFound(pizzaDAO.findByID(id), id));
     model.addAttribute("pizzas", pizzas);
     return "index";
   }
@@ -48,6 +50,6 @@ public class PizzaController {
   @ResponseStatus(HttpStatus.OK)  
   @ResponseBody
   public Pizza byID(@PathVariable( "id" ) Long id) {
-	  return pizzaDAO.findByID(id);	  
+	  return PreConditions.checkFound(pizzaDAO.findByID(id), id);	  
   }
 }
