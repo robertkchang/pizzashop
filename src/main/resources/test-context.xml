@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+ 
+  <!-- Enable @Controller annotation support -->
+  <mvc:annotation-driven />
+ 
+  <!-- Map simple view name such as "test" into /WEB-INF/test.jsp -->
+  <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/" />
+    <property name="suffix" value=".jsp" />
+  </bean>
+   
+  <!-- Scan classpath for annotations (eg: @Service, @Repository etc) -->
+  <context:component-scan base-package="pizzashop"/>
+	   
+  <bean id="pizzaMock" class="org.mockito.Mockito" factory-method="mock">
+	 <constructor-arg value="pizzashop.dao.PizzaDAO" />
+  </bean>
+  
+  <bean id="mylog" class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+    <property name="logName" value="mylog" />
+  </bean>
+  
+  <!-- JDBC Data Source. It is assumed you have MySQL running on localhost port 3306 with 
+       username root and blank password. Change below if it's not the case -->
+  <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="org.h2.Driver"/>
+    <property name="url" value="jdbc:h2:mem:test"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+  </bean>
+   
+  <!-- Hibernate Session Factory -->
+  <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <property name="dataSource" ref="myDataSource"/>
+    <property name="packagesToScan">
+      <array>
+        <value>pizzashop</value>
+      </array>
+    </property>
+    <property name="configLocation">
+      <value>classpath:hibernate.cfg.xml</value>
+    </property>
+    <property name="hibernateProperties">
+      <value>
+        hibernate.dialect=org.hibernate.dialect.H2Dialect
+      </value>
+    </property>
+  </bean>  
+       
+  <!-- Hibernate Transaction Manager -->
+  <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+    <property name="sessionFactory" ref="mySessionFactory"/>
+  </bean>       
+       
+  <!-- Activates annotation based transaction management -->
+  <tx:annotation-driven transaction-manager="transactionManager"/>
+       
+  <!-- Total customization - see below for explanation. -->
+  <bean id="contentNegotiationManager"
+             class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+    <property name="parameterName" value="mediaType" />
+    <property name="useJaf" value="false"/>
+    <property name="defaultContentType" value="application/json" />
+
+    <property name="mediaTypes">
+        <map>
+            <entry key="json" value="application/json" />
+            <entry key="html" value="text/html" />
+       </map>
+    </property>
+</bean>
+</beans>
