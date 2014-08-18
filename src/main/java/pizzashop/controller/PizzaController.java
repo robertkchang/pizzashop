@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -51,5 +53,12 @@ public class PizzaController {
   @ResponseBody
   public Pizza byID(@PathVariable( "id" ) Long id) {
 	  return PreConditions.checkFound(pizzaDAO.findByID(id), id);	  
+  }
+  
+  @RequestMapping( method = RequestMethod.POST, produces={"application/json"})
+  @ResponseStatus( HttpStatus.CREATED )
+  @ResponseBody
+  public Pizza create(@ModelAttribute("pizza") Pizza pizza) {
+	  return pizzaDAO.create(pizza);
   }
 }

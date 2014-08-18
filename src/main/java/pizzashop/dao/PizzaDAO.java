@@ -32,4 +32,11 @@ public class PizzaDAO {
     Pizza pizza = (Pizza) session.get(Pizza.class, id);
     return pizza;
   }
+  
+  @Transactional
+  public Pizza create(Pizza pizza) {
+	  Session session = sessionFactory.getCurrentSession();
+	  session.save(pizza);
+	  return pizza;
+  }
 }
