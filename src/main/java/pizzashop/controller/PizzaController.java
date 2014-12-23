@@ -1,13 +1,13 @@
 package pizzashop.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +59,17 @@ public class PizzaController {
   @ResponseStatus( HttpStatus.CREATED )
   @ResponseBody
   public Pizza create(@ModelAttribute("pizza") Pizza pizza) {
-	  return pizzaDAO.create(pizza);
+	  return pizzaDAO.save(pizza);
+  }
+  
+  @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces={"application/json"}, headers = "content-type=application/x-www-form-urlencoded")
+  @ResponseStatus( HttpStatus.OK )
+  @ResponseBody
+//  public Pizza update(@RequestBody Pizza pizza, @PathVariable("id") Long id,  Model model) {
+  public Pizza update(@PathVariable("id") Long id,  @ModelAttribute("pizza") Pizza pizza, Model model) {
+	  Pizza found = PreConditions.checkFound(pizzaDAO.findByID(id), id);
+	  found.setName(pizza.getName());
+	  found.setPrice(pizza.getPrice());
+	  return pizzaDAO.save(found);
   }
 }

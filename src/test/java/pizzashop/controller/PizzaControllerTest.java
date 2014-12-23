@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -122,7 +123,7 @@ public class PizzaControllerTest {
 		createMe.setName("New Pizza");
 		createMe.setPrice(15D);
 		
-		when(pizzaMock.create(any(Pizza.class))).thenReturn(createMe);
+		when(pizzaMock.save(any(Pizza.class))).thenReturn(createMe);
 
 		mockMvc.perform(post("/pizzas.json")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -134,7 +135,7 @@ public class PizzaControllerTest {
                 .andExpect(jsonPath("$.price", is(createMe.getPrice())));		
 		
 		ArgumentCaptor<Pizza> captor = ArgumentCaptor.forClass(Pizza.class);
-        verify(pizzaMock, times(1)).create(captor.capture());
+        verify(pizzaMock, times(1)).save(captor.capture());
 		verifyNoMoreInteractions(pizzaMock);
 		
 		// validate argument into PizzaController.create
@@ -142,7 +143,39 @@ public class PizzaControllerTest {
 		assertThat(pizzaArg.getId(), is(0L));
 		assertThat(pizzaArg.getName(), is(createMe.getName()));
 		assertThat(pizzaArg.getPrice(), is(createMe.getPrice()));
+	}
+	
+	@Test
+	public void updatePizza() throws Exception {
 		
+		Pizza first = new Pizza();
+		first.setId(1L);
+		first.setName("New Pizza");
+		first.setPrice(15D);
 		
+		Pizza updated = new Pizza();
+		updated.setId(1);
+		updated.setName("New Pizzax");
+		updated.setPrice(15D);
+		
+		when(pizzaMock.findByID(1L)).thenReturn(first);
+		when(pizzaMock.save(any(Pizza.class))).thenReturn(updated);
+
+		mockMvc.perform(put("/pizzas/1.json")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("name", "New Pizzax"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(Integer.parseInt(String.valueOf(updated.getId())))))
+                .andExpect(jsonPath("$.name", is(updated.getName())))
+                .andExpect(jsonPath("$.price", is(updated.getPrice())));		
+		
+		ArgumentCaptor<Pizza> captor = ArgumentCaptor.forClass(Pizza.class);
+        verify(pizzaMock, times(1)).save(captor.capture());
+		
+		// validate argument into PizzaController.create
+		Pizza pizzaArg = (Pizza) captor.getValue();
+		assertThat(pizzaArg.getId(), is(1L));
+		assertThat(pizzaArg.getName(), is(updated.getName()));
+		assertThat(pizzaArg.getPrice(), is(0D));
 	}
 }

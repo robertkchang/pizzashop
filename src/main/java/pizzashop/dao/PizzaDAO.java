@@ -34,9 +34,9 @@ public class PizzaDAO {
   }
   
   @Transactional
-  public Pizza create(Pizza pizza) {
+  public Pizza save(Pizza pizza) {
 	  Session session = sessionFactory.getCurrentSession();
-	  session.save(pizza);
+	  session.saveOrUpdate(pizza);
 	  return pizza;
   }
 }
