@@ -39,4 +39,10 @@ public class PizzaDAO {
 	  session.saveOrUpdate(pizza);
 	  return pizza;
   }
+  
+  @Transactional
+  public void delete(Pizza pizza) {
+	  Session session = sessionFactory.getCurrentSession();
+	  session.delete(pizza);	  
+  }
 }

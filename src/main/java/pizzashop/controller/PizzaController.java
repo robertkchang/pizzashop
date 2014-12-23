@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -65,11 +63,18 @@ public class PizzaController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces={"application/json"}, headers = "content-type=application/x-www-form-urlencoded")
   @ResponseStatus( HttpStatus.OK )
   @ResponseBody
-//  public Pizza update(@RequestBody Pizza pizza, @PathVariable("id") Long id,  Model model) {
   public Pizza update(@PathVariable("id") Long id,  @ModelAttribute("pizza") Pizza pizza, Model model) {
 	  Pizza found = PreConditions.checkFound(pizzaDAO.findByID(id), id);
 	  found.setName(pizza.getName());
 	  found.setPrice(pizza.getPrice());
 	  return pizzaDAO.save(found);
+  }
+  
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  @ResponseStatus( HttpStatus.OK )
+  @ResponseBody
+  public void destroy(@PathVariable("id") Long id, @ModelAttribute("pizza") Pizza pizza) {
+	  Pizza found = PreConditions.checkFound(pizzaDAO.findByID(id), id);	  
+	  pizzaDAO.delete(found);
   }
 }

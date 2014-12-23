@@ -11,6 +11,7 @@ import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -172,10 +174,33 @@ public class PizzaControllerTest {
 		ArgumentCaptor<Pizza> captor = ArgumentCaptor.forClass(Pizza.class);
         verify(pizzaMock, times(1)).save(captor.capture());
 		
-		// validate argument into PizzaController.create
+		// validate argument into PizzaController.update
 		Pizza pizzaArg = (Pizza) captor.getValue();
 		assertThat(pizzaArg.getId(), is(1L));
 		assertThat(pizzaArg.getName(), is(updated.getName()));
-		assertThat(pizzaArg.getPrice(), is(0D));
+		assertThat(pizzaArg.getPrice(), is(0D)); // not a param value
+	}
+	
+	@Test
+	public void destroyPizza() throws Exception {
+		
+		Pizza first = new Pizza();
+		first.setId(1L);
+		first.setName("New Pizza");
+		first.setPrice(15D);
+		
+		when(pizzaMock.findByID(1L)).thenReturn(first);
+		Mockito.doNothing().when(pizzaMock).delete(any(Pizza.class));
+		
+		mockMvc.perform(delete("/pizzas/1")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk());                
+	
+		ArgumentCaptor<Pizza> captor = ArgumentCaptor.forClass(Pizza.class);
+        verify(pizzaMock, times(1)).delete(captor.capture());
+		
+		// validate argument into PizzaController.destroy
+		Pizza pizzaArg = (Pizza) captor.getValue();
+		assertThat(pizzaArg.getId(), is(1L));
 	}
 }
